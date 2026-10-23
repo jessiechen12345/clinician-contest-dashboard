@@ -1,0 +1,47 @@
+,,,,,,,,,,,,,,,,,,,,,,,,,September,09/01/2026,,,,,,October,10/01/2026,,,,,,November,11/01/2026,,,,,,December,12/01/2026,,,,,
+Liaison,Full Name,THVC Email,Role,Designation,Primary Province,Cross-Licensed Provinces,Status,Schedule Type,Consults per Hour,Average Hours/Week,1st Rate,2nd Rate,3rd Rate,Contract Renewal Date,Start Date,Phone ,Legal Name,Personal Email,Street Address,Residing City,Residing Province,Postal Code,Notes / Misc.,Unique ID,ON Consults,QC Consults,SUM ON/QC Consults,ON/QC Ratio,All Up: Consults/hr,PSAT,Ballots Earned,ON Consults,QC Consults,SUM ON/QC Consults,ON/QC Ratio,All Up: Consults/hr,PSAT,Ballots Earned,ON Consults,QC Consults,SUM ON/QC Consults,ON/QC Ratio,All Up: Consults/hr,PSAT,Ballots Earned,ON Consults,QC Consults,SUM ON/QC Consults,ON/QC Ratio,All Up: Consults/hr,PSAT,Ballots Earned
+,Sample Clinician 01,sample01@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1001,82,14,96,0.85,1.71,0,0,137,0,137,1.0,2.57,4.9,2,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 02,sample02@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1002,54,0,54,1.0,1.14,0,0,61,10,71,0.86,2.19,4.9,2,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 03,sample03@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1003,31,0,31,1.0,0.58,4.8,0,12,0,12,1.0,0.23,4.5,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 04,sample04@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1004,74,0,74,1.0,1.43,4.9,0,78,0,78,1.0,2.29,4.9,2,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 05,sample05@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1005,48,0,48,1.0,0.92,0,0,144,0,144,1.0,2.89,4.9,2,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 06,sample06@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1006,109,0,109,1.0,2.24,4.8,2,92,0,92,1.0,1.49,4.5,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 07,sample07@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1007,20,0,20,1.0,0.39,4.7,0,114,0,114,1.0,3.28,4.8,2,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 08,sample08@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1008,42,0,42,1.0,1.16,4.8,0,107,0,107,1.0,1.77,4.9,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 09,sample09@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1009,80,0,80,1.0,1.49,4.9,0,116,0,116,1.0,1.71,4.8,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 10,sample10@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1010,16,0,16,1.0,0.29,4.8,0,72,50,122,0.59,1.86,4.7,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 11,sample11@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1011,5,0,5,1.0,0.14,0,0,126,0,126,1.0,2.07,4.5,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 12,sample12@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1012,63,30,93,0.68,1.39,4.8,0,20,15,35,0.57,0.76,4.7,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 13,sample13@example.org,,,,,Inactive,,,,,,,,,,,,,,,,,SC1013,35,57,92,0.38,1.43,4.7,0,106,27,133,0.8,1.95,4.5,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 14,sample14@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1014,21,0,21,1.0,0.53,4.5,0,3,0,3,1.0,0.07,0,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 15,sample15@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1015,37,0,37,1.0,0.68,4.7,0,32,0,32,1.0,0.66,4.9,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 16,sample16@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1016,100,30,130,0.77,2.84,4.8,2,102,0,102,1.0,3.12,4.5,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 17,sample17@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1017,112,0,112,1.0,2.57,0,0,26,0,26,1.0,0.51,4.7,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 18,sample18@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1018,157,0,157,1.0,2.42,4.9,2,96,0,96,1.0,1.41,4.9,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 19,sample19@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1019,93,0,93,1.0,2.69,4.8,2,119,35,154,0.77,3.63,4.5,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 20,sample20@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1020,26,0,26,1.0,0.44,4.8,0,41,0,41,1.0,1.07,4.9,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 21,sample21@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1021,92,0,92,1.0,1.53,4.7,0,23,0,23,1.0,0.45,4.5,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 22,sample22@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1022,91,0,91,1.0,1.77,4.9,0,84,0,84,1.0,1.54,4.5,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 23,sample23@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1023,61,57,118,0.52,1.98,4.5,0,51,38,89,0.57,2.01,0,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 24,sample24@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1024,7,0,7,1.0,0.14,4.5,0,154,27,181,0.85,2.9,4.7,2,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 25,sample25@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1025,93,0,93,1.0,2.73,4.8,2,50,0,50,1.0,1.01,4.9,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 26,sample26@example.org,,,,,Inactive,,,,,,,,,,,,,,,,,SC1026,0,0,0,,0,0,0,30,0,30,1.0,0.61,4.5,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 27,sample27@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1027,111,0,111,1.0,3.32,4.8,2,118,0,118,1.0,2.0,4.5,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 28,sample28@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1028,32,0,32,1.0,0.6,4.8,0,37,44,81,0.46,1.44,4.7,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 29,sample29@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1029,39,0,39,1.0,1.26,0,0,134,0,134,1.0,2.83,4.5,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 30,sample30@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1030,54,0,54,1.0,1.4,4.9,0,61,0,61,1.0,1.51,4.8,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 31,sample31@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1031,33,0,33,1.0,0.5,4.9,0,132,0,132,1.0,2.57,4.9,2,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 32,sample32@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1032,130,6,136,0.96,2.23,4.9,2,1,0,1,1.0,0.03,4.8,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 33,sample33@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1033,158,0,158,1.0,3.02,4.7,2,132,38,170,0.78,2.77,0,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 34,sample34@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1034,143,0,143,1.0,3.8,0,0,25,37,62,0.4,1.18,0,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 35,sample35@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1035,113,0,113,1.0,1.96,4.8,0,130,39,169,0.77,3.36,4.5,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 36,sample36@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1036,133,0,133,1.0,2.09,4.5,0,106,12,118,0.9,2.47,0,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 37,sample37@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1037,61,0,61,1.0,1.58,4.7,0,31,0,31,1.0,0.46,4.7,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 38,sample38@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1038,36,0,36,1.0,0.52,4.5,0,24,30,54,0.44,1.48,4.5,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 39,sample39@example.org,,,,,Inactive,,,,,,,,,,,,,,,,,SC1039,41,50,91,0.45,1.3,4.8,0,86,0,86,1.0,1.94,0,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,Sample Clinician 40,sample40@example.org,,,,,Active,,,,,,,,,,,,,,,,,SC1040,93,0,93,1.0,1.78,4.8,0,4,0,4,1.0,0.08,4.7,0,0,0,0,,0,0,0,0,0,0,,0,0,0
+,,,,,,,,,,,,,,,,,,,,,,,,#N/A
+,Edge Case 1,edge1@example.org,,,,,Active,,,,,,,,,,,,,,,,,EDGE-TARGET,80,0,80,1,2.0,4.7,1,,,,,,,,,,,,,,,,,,,,,
+,Edge Case 2,edge2@example.org,,,,,Active,,,,,,,,,,,,,,,,,EDGE-STRETCH,90,0,90,1,2.15,4.8,2,,,,,,,,,,,,,,,,,,,,,
+,Edge Case 3,edge3@example.org,,,,,Active,,,,,,,,,,,,,,,,,EDGE-LOWVOL,69,0,69,1,2.5,4.9,0,,,,,,,,,,,,,,,,,,,,,
+,Edge Case 4,edge4@example.org,,,,,Active,,,,,,,,,,,,,,,,,EDGE-LOWPSAT,100,0,100,1,2.5,4.6,0,,,,,,,,,,,,,,,,,,,,,
