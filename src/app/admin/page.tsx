@@ -101,7 +101,7 @@ export default function PublicPage() {
                 <tr>
                   <th className="pb-3 font-semibold">Clinician</th>
                   <th className="pb-3 font-semibold">Consults / Hr</th>
-                  <th className="pb-3 font-semibold">PSAT</th>
+                  <th className="pb-3 font-semibold">Patient Satisfaction Score</th>
                   <th className="pb-3 font-semibold text-right">Ballots Earned</th>
                 </tr>
               </thead>
