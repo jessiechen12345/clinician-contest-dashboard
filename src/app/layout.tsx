@@ -6,7 +6,7 @@ import Providers from "./providers";
 const ui = Atkinson_Hyperlegible({ weight: ["400", "700"], subsets: ["latin"], variable: "--font-ui", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Clinician Contest",
+  title: "Care Capacity Initiative",
   description: "Check your monthly consults per hour, ballots and odds.",
   robots: { index: false, follow: false }
 };
