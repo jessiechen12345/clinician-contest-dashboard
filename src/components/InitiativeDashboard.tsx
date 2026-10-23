@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import StatCard from "./StatCard";
 import { DEFAULT_RULES } from "@/lib/config";
@@ -45,7 +44,7 @@ const label = "text-xs font-bold uppercase tracking-[0.14em]";
  * Always renders the complete layout. Anything not loaded yet falls back to a default or a dash,
  * so there is never a blank or "loading-only" screen.
  */
-export default function InitiativeDashboard() {
+export default function InitiativeDashboard({ apiBase = "/api/metabase" }: { apiBase?: string }) {
   const [month, setMonth] = useState<string | undefined>();
   const [sum, setSum] = useState<Summary | null>(null);
   const [loadState, setLoadState] = useState<LoadState>("loading");
@@ -57,7 +56,7 @@ export default function InitiativeDashboard() {
   const load = useCallback(async (m?: string) => {
     setLoadState("loading");
     try {
-      const res = await fetch(`/api/metabase/summary${m ? `?month=${m}` : ""}`, { cache: "no-store" });
+      const res = await fetch(`${apiBase}/summary${m ? `?month=${m}` : ""}`, { cache: "no-store" });
       if (!res.ok) throw new Error("summary");
       const data: Summary = await res.json();
       setSum(data);
@@ -66,7 +65,7 @@ export default function InitiativeDashboard() {
     } catch {
       setLoadState("error");
     }
-  }, []);
+  }, [apiBase]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -83,7 +82,7 @@ export default function InitiativeDashboard() {
     setMine(null);
     setBusy(true);
     try {
-      const res = await fetch("/api/metabase/lookup", {
+      const res = await fetch(`${apiBase}/lookup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ clinicianId: id, month })
@@ -122,7 +121,6 @@ export default function InitiativeDashboard() {
         {/* 1. Header */}
         <div className="flex items-start justify-between gap-4">
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-teal-700">Care Capacity Initiative</p>
-          <Link href="/admin" className="text-sm text-teal-700 underline underline-offset-4 hover:text-teal-900">Admin Portal</Link>
         </div>
         <h1 className="mt-3 max-w-2xl text-4xl font-bold leading-[1.1] tracking-tight sm:text-5xl">
           Check your ballots &amp; winning odds
