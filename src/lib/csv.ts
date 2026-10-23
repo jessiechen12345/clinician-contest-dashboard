@@ -67,6 +67,8 @@ export function parseProductivityRows(rows: unknown[][], source: Dataset["source
     const months: Record<MonthKey, MonthMetrics> = {};
     for (const b of blocks) {
       months[b.month] = {
+                on: num(row[b.start + BLOCK.on]),
+        qc: num(row[b.start + BLOCK.qc]),
         consults: num(row[b.start + BLOCK.sum]),
         rate: num(row[b.start + BLOCK.rate]),
         psat: num(row[b.start + BLOCK.psat]),
