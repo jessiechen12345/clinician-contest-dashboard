@@ -4,6 +4,9 @@ export type MonthKey = string;
 export interface MonthMetrics {
   /** SUM ON/QC Consults – already combined across provinces (multi-licensed safe). */
   consults: number | null;
+    /** Ontario / Québec consults separately (absent in data synced before this field existed). */
+  on?: number | null;
+  qc?: number | null;
   /** All Up: Consults/hr */
   rate: number | null;
   /** PSAT score for the month (0 / null when not enough encounters). */
