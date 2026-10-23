@@ -166,7 +166,7 @@ function SettingsCard({ meta, month, reload }: { meta: any; month: string; reloa
         <label>Start date<input className={input} type="date" value={f.startDate} onChange={set("startDate")} /></label>
         <label>End date<input className={input} type="date" value={f.endDate} onChange={set("endDate")} /></label>
         <label className="sm:col-span-2">Eligible statuses (comma-separated)<input className={input} value={f.eligible} onChange={set("eligible")} /></label>
-        <label className="sm:col-span-4">Prizes (one per line)<textarea className={input} rows={3} value={f.prizes} onChange={set("prizes")} /></label>
+        <label className="sm:col-span-4">Prizes (one per line; for French write English | Français)<textarea className={input} rows={3} value={f.prizes} onChange={set("prizes")} /></label>
       </div>
       <label className="mt-4 flex items-center gap-2"><input type="checkbox" checked={f.makeActive} onChange={set("makeActive")} className="h-5 w-5" /> Show this month on the public page by default</label>
       <p className="mt-2 text-sm text-teal-800">Minimum consults and minimum Patient Satisfaction Score needed to earn a ballot. Set the score to 0 to turn that rule off.</p>
