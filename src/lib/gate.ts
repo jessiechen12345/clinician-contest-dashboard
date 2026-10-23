@@ -3,7 +3,7 @@
  * Token = `${expiryMs}.${epoch}.${hmac}`. The "epoch" changes whenever an admin changes the password or
  * signs everyone out, which invalidates every previously issued cookie.
  */
-import { Redis } from "@upstash/redis";
+import { getRedis, redisConfig } from "./redisEnv";
 
 export const GATE_COOKIE = "site_gate";
 export const GATE_MAX_AGE = 60 * 60 * 12; // 12 hours
@@ -31,14 +31,14 @@ function safeEqual(a: string, b: string): boolean {
  * null = epoch not enforced (local-file mode has no storage reachable from the Edge runtime).
  */
 let cache: { v: string; at: number } | null = null;
-const redisConfigured = () => !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+const redisConfigured = () => redisConfig() !== null;
 
 async function currentEpoch(forceFresh: boolean): Promise<string | null> {
   if (!redisConfigured()) return null;
   const age = cache ? Date.now() - cache.at : Infinity;
   if (cache && age < (forceFresh ? 2_000 : 30_000)) return cache.v;
   try {
-    const rec = await Redis.fromEnv().get<{ epoch?: string }>("gate");
+    const rec = await getRedis()!.get<{ epoch?: string }>("gate");
     cache = { v: rec?.epoch ?? "0", at: Date.now() };
     return cache.v;
   } catch {
