@@ -4,6 +4,7 @@ import GoogleProvider from "next-auth/providers/google";
 import AzureADProvider from "next-auth/providers/azure-ad";
 import { NextResponse } from "next/server";
 import { isAdminEmail } from "@/config/adminWhitelist";
+   import { getAdminFromCookies } from "./adminSession";
 
 const providers: NextAuthOptions["providers"] = [];
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
