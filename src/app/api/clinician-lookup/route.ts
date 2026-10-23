@@ -11,7 +11,7 @@ const LIMIT = Number(process.env.LOOKUP_RATE_LIMIT_PER_10MIN ?? 20);
 const NOT_FOUND = {
   error: "not_found",
   message:
-    "We couldn't find that ID for this month. Check for typos, or use the Unique ID / THVC email on your contest record. Still stuck? Contact your liaison."
+    "We couldn't find that Unique Clinician ID for this month. Check for typos. Still stuck? Contact your liaison."
 };
 
 /**
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
   }
   const query = typeof body.clinicianId === "string" ? body.clinicianId.trim().toLowerCase() : "";
   if (query.length < 2 || query.length > 120) {
-    return NextResponse.json({ error: "bad_request", message: "Enter your Unique ID or THVC email." }, { status: 400 });
+    return NextResponse.json({ error: "bad_request", message: "Enter your Unique Clinician ID." }, { status: 400 });
   }
 
   const [ds, settings] = await Promise.all([loadDataset(), loadSettings()]);
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const rec = ds.records.find((r) => r.id.toLowerCase() === query || r.email === query);
+  const rec = ds.records.find((r) => r.id.toLowerCase() === query);
   // Same response for "unknown" and "not eligible" so IDs can't be probed.
   if (!rec || !isEligible(rec, settings)) return NextResponse.json(NOT_FOUND, { status: 404 });
 
