@@ -31,7 +31,7 @@ export default function LoginPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-5">
       <form onSubmit={submit} className="rounded-xl border border-teal-200 bg-white p-6">
-        <h1 className="text-2xl font-bold">Clinician Contest</h1>
+        <h1 className="text-2xl font-bold">Care Capacity Initiative</h1>
         <p className="mt-2">Enter the access password to continue.</p>
         <label htmlFor="pw" className="mt-5 block font-bold">Password</label>
         <input
