@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; }
+html { scroll-padding-top: 1rem; }
+body { background: #F1F8F8; color: #12303A; }
+
+:focus-visible { outline: 3px solid #1E7781; outline-offset: 2px; border-radius: 4px; }
+
+/* ballot stub with side notches */
+.stub {
+  --notch: 9px;
+  background:
+    radial-gradient(circle at 0 50%, #F1F8F8 var(--notch), transparent calc(var(--notch) + 0.5px)) left / 51% 100% no-repeat,
+    radial-gradient(circle at 100% 50%, #F1F8F8 var(--notch), transparent calc(var(--notch) + 0.5px)) right / 51% 100% no-repeat,
+    #E7A93A;
+}
+.stub-empty {
+  background:
+    radial-gradient(circle at 0 50%, #F1F8F8 var(--notch), transparent calc(var(--notch) + 0.5px)) left / 51% 100% no-repeat,
+    radial-gradient(circle at 100% 50%, #F1F8F8 var(--notch), transparent calc(var(--notch) + 0.5px)) right / 51% 100% no-repeat,
+    #DDEEEE;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
