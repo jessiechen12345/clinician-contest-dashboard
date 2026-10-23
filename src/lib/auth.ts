@@ -39,6 +39,8 @@ export const authOptions: NextAuthOptions = {
 
 /** Use at the top of every /api/admin/* handler. Returns the admin's e-mail or a ready-made error response. */
 export async function requireAdmin(): Promise<{ email: string } | { error: NextResponse }> {
+     const viaCookie = await getAdminFromCookies();
+     if (viaCookie) return { email: viaCookie };
   let email: string | null | undefined;
   try {
     email = (await getServerSession(authOptions))?.user?.email;
