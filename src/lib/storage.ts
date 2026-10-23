@@ -1,4 +1,4 @@
-import { Redis } from "@upstash/redis";
+import { getRedis } from "./redisEnv";
 import { promises as fs } from "fs";
 import path from "path";
 
@@ -7,8 +7,8 @@ import path from "path";
  *  - Production / Vercel: Upstash Redis (UPSTASH_REDIS_REST_URL + _TOKEN)
  *  - Local dev: JSON files in ./.data (git-ignored)
  */
-const hasRedis = !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
-const redis = hasRedis ? Redis.fromEnv() : null;
+const redis = getRedis();
+const hasRedis = !!redis;
 const DIR = path.join(process.cwd(), ".data");
 const mem = new Map<string, { v: unknown; exp?: number }>();
 
@@ -37,7 +37,7 @@ export async function setJSON(key: string, value: unknown): Promise<void> {
     await fs.writeFile(path.join(DIR, `${key}.json`), JSON.stringify(value));
   } catch {
     throw new Error(
-      "No writable storage. Configure UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN (required on Vercel)."
+      "No writable storage. Configure UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN (or KV_REST_API_URL / KV_REST_API_TOKEN) — required on Vercel."
     );
   }
 }
