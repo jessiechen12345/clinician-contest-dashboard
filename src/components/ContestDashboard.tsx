@@ -273,7 +273,7 @@ export default function ContestDashboard() {
 
         {/* 6. Footer disclaimer */}
         <p className="mt-12 max-w-3xl border-t border-teal-200 pt-5 text-sm text-teal-800">
-          Consults under 5 minutes are excluded. For multi-licensed clinicians, Ontario and Québec consults are combined.
+                   For multi-licensed clinicians, Ontario and Québec consults are combined.
           Winning odds shown are for a single prize draw; with multiple prizes your overall chance is higher.
         </p>
       </main>
