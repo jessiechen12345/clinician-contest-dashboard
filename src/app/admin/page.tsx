@@ -40,7 +40,7 @@ export default function PublicPage() {
     loadData();
   }, [loadData]);
 
-  if (loading && !data) return <p className="p-8">Loading contest dashboard…</p>;
+  if (loading && !data) return <p className="p-8">Loading dashboard…</p>;
   if (error) return <p className="p-8 text-alert">Error loading dashboard: {error}</p>;
 
   const filtered = data?.clinicians?.filter((c: any) =>
@@ -53,7 +53,7 @@ export default function PublicPage() {
     <div className="min-h-screen bg-slate-50">
       <header className="border-b border-teal-200 bg-white">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-5 py-4">
-          <span className="text-xl font-bold text-teal-800">Clinician Contest Dashboard</span>
+          <span className="text-xl font-bold text-teal-800">Clinician Dashboard</span>
           <Link href="/admin" className="text-sm font-semibold text-teal-700 underline hover:text-teal-900">
             Admin Portal
           </Link>
@@ -63,7 +63,7 @@ export default function PublicPage() {
       <main className="mx-auto max-w-5xl space-y-6 px-5 py-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">Contest Standings ({month})</h1>
+            <h1 className="text-2xl font-bold text-slate-800">Standings ({month})</h1>
             {data?.lastSynced && (
               <p className="mt-1 text-sm text-slate-500">
                 Last updated {fmtDateTime(data.lastSynced)}
