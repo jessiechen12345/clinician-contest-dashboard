@@ -22,6 +22,7 @@ export async function GET(req: Request) {
     const cfg = resolveMonthConfig(settings, settings.activeMonth);
     return NextResponse.json({
       ready: false,
+      reason: "no_data",
       message: "No data has been uploaded yet.",
       month: settings.activeMonth,
       monthLabel: monthLabel(settings.activeMonth),
