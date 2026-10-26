@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { fmtDateTime } from "@/lib/format";
+import { DEFAULT_RULES } from "@/lib/config";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const card = "rounded-xl border border-teal-200 bg-white p-5 sm:p-6";
@@ -112,8 +113,9 @@ export default function AdminPage() {
 
         <DataCard meta={meta} reload={() => load(month)} />
         <SettingsCard key={month} meta={meta} month={month} reload={() => load(month)} />
+        <RulesCard key={`rules-${month}-${JSON.stringify(meta.config)}-${meta.dataset?.syncedAt}`} month={month} />
         <GateCard />
-        <AnalyticsCard key={`a-${month}-${meta.dataset?.syncedAt}`} month={month} hasData={months.includes(month)} />
+        <AnalyticsCard key={`a-${month}-${meta.dataset?.syncedAt}-${JSON.stringify(meta.config)}`} month={month} hasData={months.includes(month)} />
         <DrawCard key={`d-${month}`} month={month} hasData={months.includes(month)} cfg={meta.config} reload={() => load(month)} />
       </main>
     </div>
@@ -166,10 +168,17 @@ function SettingsCard({ meta, month, reload }: { meta: any; month: string; reloa
         <label>Start date<input className={input} type="date" value={f.startDate} onChange={set("startDate")} /></label>
         <label>End date<input className={input} type="date" value={f.endDate} onChange={set("endDate")} /></label>
         <label className="sm:col-span-2">Eligible statuses (comma-separated)<input className={input} value={f.eligible} onChange={set("eligible")} /></label>
-        <label className="sm:col-span-4">Prizes (one per line; for French write English | Français)<textarea className={input} rows={3} value={f.prizes} onChange={set("prizes")} /></label>
+        <label className="sm:col-span-4">Prizes (one per line)<textarea className={input} rows={3} value={f.prizes} onChange={set("prizes")} /></label>
       </div>
       <label className="mt-4 flex items-center gap-2"><input type="checkbox" checked={f.makeActive} onChange={set("makeActive")} className="h-5 w-5" /> Show this month on the public page by default</label>
       <p className="mt-2 text-sm text-teal-800">Minimum consults and minimum Patient Satisfaction Score needed to earn a ballot. Set the score to 0 to turn that rule off.</p>
+      <button
+        type="button"
+        className="mt-2 text-sm underline"
+        onClick={() => setF({ ...f, target: String(DEFAULT_RULES.target), stretch: String(DEFAULT_RULES.stretch), minConsults: String(DEFAULT_RULES.minConsults), minPsat: String(DEFAULT_RULES.minPsat) })}
+      >
+        Reset the four rule numbers to the spreadsheet&apos;s ({DEFAULT_RULES.minConsults} consults, {DEFAULT_RULES.minPsat} satisfaction, {DEFAULT_RULES.target.toFixed(2)} and {DEFAULT_RULES.stretch.toFixed(2)} per hour). Then press Save.
+      </button>
       <div className="mt-4"><button className={btn}>Save settings</button></div>
       <Notice n={n} />
     </form>
@@ -226,6 +235,70 @@ function DataCard({ meta, reload }: { meta: any; reload: () => void }) {
         </label>
       </div>
       <Notice n={n} />
+    </section>
+  );
+}
+
+function RulesCard({ month }: { month: string }) {
+  const [r, setR] = useState<any>(null);
+  const [err, setErr] = useState<string | null>(null);
+  useEffect(() => {
+    api(`/api/admin/rules?month=${month}`).then(setR).catch((e) => setErr(e.message));
+  }, [month]);
+
+  if (err) return <section className={card}><p role="alert" className="text-alert">{err}</p></section>;
+  if (!r) return <section className={card}>Loading ballot rules…</section>;
+
+  const { rules, counts } = r;
+  const rate = (n: number) => n.toFixed(2);
+  const differences: string[] = [];
+  if (rules.minConsults !== DEFAULT_RULES.minConsults) differences.push(`minimum consults ${rules.minConsults} (spreadsheet: ${DEFAULT_RULES.minConsults})`);
+  if (rules.minPsat !== DEFAULT_RULES.minPsat) differences.push(`minimum satisfaction ${rules.minPsat} (spreadsheet: ${DEFAULT_RULES.minPsat})`);
+  if (rules.target !== DEFAULT_RULES.target) differences.push(`threshold ${rate(rules.target)} (spreadsheet: ${rate(DEFAULT_RULES.target)})`);
+  if (rules.stretch !== DEFAULT_RULES.stretch) differences.push(`stretch threshold ${rate(rules.stretch)} (spreadsheet: ${rate(DEFAULT_RULES.stretch)})`);
+  const n = (x: number) => x.toLocaleString("en-CA");
+
+  return (
+    <section className={card} aria-labelledby="rules-h">
+      <h2 id="rules-h" className="text-xl font-bold">How ballots are earned for {month}</h2>
+      <p className="mt-2 text-sm text-teal-800">These come from the numbers saved under Settings above. Both of the first two rules must be met before any ballot counts.</p>
+      <ol className="mt-3 list-decimal space-y-1 pl-6">
+        <li>At least <strong>{rules.minConsults}</strong> consults in the month (Québec and Ontario combined).</li>
+        <li>
+          {rules.minPsat > 0
+            ? <>A Patient Satisfaction Score of at least <strong>{rules.minPsat}</strong>. A missing or zero score earns no ballots.</>
+            : <>No Patient Satisfaction Score is required (this rule is turned off).</>}
+        </li>
+        <li>Then <strong>{rate(rules.target)}</strong> or more consults per hour earns <strong>1 ballot</strong>, and <strong>{rate(rules.stretch)}</strong> or more earns <strong>2 ballots</strong>.</li>
+      </ol>
+      {differences.length === 0
+        ? <p className="mt-3 rounded-md bg-teal-100 p-3 text-sm">Same as the spreadsheet formula.</p>
+        : <p role="status" className="mt-3 rounded-md bg-stub-soft p-3 text-sm"><strong>Different from the spreadsheet formula:</strong> {differences.join("; ")}. Ballot counts will not match the spreadsheet&apos;s Ballots Earned column.</p>}
+
+      <h3 className="mt-5 font-bold">What the rules do to the uploaded data</h3>
+      {!counts ? (
+        <p className="mt-2 text-sm">Upload data that includes {month} to see this.</p>
+      ) : (
+        <>
+          <p className="mt-1 text-sm text-teal-800">{n(counts.eligibleWithData)} eligible clinicians have figures for this month.</p>
+          <dl className="mt-3 grid gap-3 sm:grid-cols-3">
+            {[
+              ["Met the consults rule", counts.metConsults],
+              ["Met the satisfaction rule", counts.metSatisfaction],
+              ["Met both", counts.metBoth],
+              ["Reached the threshold per hour", counts.reachedThreshold],
+              ["…but blocked by the consults rule", counts.blockedByConsults],
+              ["…but blocked by the satisfaction rule", counts.blockedBySatisfaction]
+            ].map(([label, v]) => (
+              <div key={label as string} className="rounded-lg bg-teal-50 p-3">
+                <dt className="text-sm text-teal-800">{label}</dt>
+                <dd className="text-2xl font-bold tabular-nums">{n(v as number)}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="mt-3 text-sm">Result: <strong>{n(counts.twoBallots)}</strong> earned 2 ballots, <strong>{n(counts.oneBallot)}</strong> earned 1, and <strong>{n(counts.noBallots)}</strong> earned none.</p>
+        </>
+      )}
     </section>
   );
 }
