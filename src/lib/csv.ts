@@ -11,14 +11,15 @@ import { monthKeyFromSheetDate } from "./months";
  * Every column is found by its HEADER TEXT inside its own month's block, never by position, so:
  *   - blocks can be 7 or 8 columns wide and can appear in any order (e.g. Jul/Aug after Dec);
  *   - columns can move (PSAT shifted one place when "Consults/Hr Adj" was added);
- *   - "Consults/Hr Adj" is deliberately never read. Consults per hour comes from "All Up: Consults/hr",
- *     which is what the sheet's own Ballots Earned formula uses.
+ *   - "Consults/Hr Adj" (consults per hour rounded to one decimal) is what clinicians see. Its header is found by name;
+ *     if the header is blank (as over December in the real file) it is the one column between "All Up" and "PSAT".
  */
 const NAMES = {
   on: "on consults",
   qc: "qc consults",
   sum: "sum on/qc consults",
   rate: "all up: consults/hr",
+  adj: "consults/hr adj",
   psat: "psat",
   ballots: "ballots earned"
 } as const;
@@ -59,7 +60,7 @@ export function parseProductivityRows(rows: unknown[][], source: Dataset["source
   });
   starts.sort((x, y) => x.start - y.start);
 
-  type Cols = { on: number; qc: number; sum: number; rate: number; psat: number; ballots: number };
+  type Cols = { on: number; qc: number; sum: number; rate: number; adj: number; psat: number; ballots: number };
   const blocks: { month: MonthKey; cols: Cols }[] = [];
   starts.forEach((b, i) => {
     const end = i + 1 < starts.length ? starts[i + 1].start : header.length;
@@ -69,8 +70,10 @@ export function parseProductivityRows(rows: unknown[][], source: Dataset["source
     };
     const cols: Cols = {
       on: find(NAMES.on), qc: find(NAMES.qc), sum: find(NAMES.sum),
-      rate: find(NAMES.rate), psat: find(NAMES.psat), ballots: find(NAMES.ballots)
+      rate: find(NAMES.rate), adj: find(NAMES.adj), psat: find(NAMES.psat), ballots: find(NAMES.ballots)
     };
+    // Blank header over the Adj column: it is the single column between All Up and PSAT.
+    if (cols.adj < 0 && cols.rate >= 0 && cols.psat === cols.rate + 2) cols.adj = cols.rate + 1;
     // A block without these three can't produce correct ballots, so that month is left out rather than guessed.
     if (cols.rate < 0 || cols.sum < 0 || cols.psat < 0) return;
     blocks.push({ month: b.month, cols });
@@ -98,6 +101,7 @@ export function parseProductivityRows(rows: unknown[][], source: Dataset["source
         qc: at(b.cols.qc),
         consults: at(b.cols.sum),
         rate: at(b.cols.rate),
+        rateAdj: at(b.cols.adj),
         psat: at(b.cols.psat),
         sheetBallots: at(b.cols.ballots)
       };

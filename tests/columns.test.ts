@@ -28,14 +28,14 @@ describe("new column layout (Consults/Hr Adj added, PSAT moved one column)", () 
   it("finds all six months even when they are out of order, sorted oldest to newest", () => {
     expect(ds.months).toEqual(["2026-07", "2026-08", "2026-09", "2026-10", "2026-11", "2026-12"]);
   });
-  it("reads consults per hour from All Up, never from the Adj column", () => {
-    for (const m of ds.months) expect(ds.records[0].months[m].rate).toBe(1.96);
+  it("keeps All Up (unrounded) and Adj (the rounded value clinicians see) as separate numbers", () => {
+    for (const m of ds.months) expect(ds.records[0].months[m]).toMatchObject({ rate: 1.96, rateAdj: 2.0 });
   });
   it("reads PSAT and Ballots Earned from their moved columns", () => {
     for (const m of ds.months) expect(ds.records[0].months[m]).toMatchObject({ psat: 4.92, sheetBallots: 1, consults: 100, on: 10, qc: 90 });
   });
   it("still works when the Adj column's header is blank (as over December in the real file)", () => {
-    expect(ds.records[0].months["2026-12"]).toMatchObject({ rate: 1.96, psat: 4.92 });
+    expect(ds.records[0].months["2026-12"]).toMatchObject({ rate: 1.96, rateAdj: 2.0, psat: 4.92 });
   });
 });
 

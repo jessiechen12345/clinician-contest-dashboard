@@ -3,6 +3,7 @@ import { isEligible, resolveBallots } from "@/lib/ballots";
 import { resolveMonthConfig } from "@/lib/config";
 import { monthLabel } from "@/lib/months";
 import { clientIp, rateLimited } from "@/lib/rateLimit";
+import { displayRate } from "@/lib/rates";
 import { loadDataset } from "@/lib/store";
 import { resolveMonth, safeSettings } from "@/lib/uploaded";
 
@@ -55,7 +56,7 @@ export async function POST(req: Request) {
   return NextResponse.json({
     month,
     monthLabel: monthLabel(month),
-    consultsPerHour: m.rate,
+    consultsPerHour: displayRate(m),
     totalConsults: m.consults,
     satisfaction: m.psat && m.psat > 0 ? m.psat : null,
     ballots: result.ballots

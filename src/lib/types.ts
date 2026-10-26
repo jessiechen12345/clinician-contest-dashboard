@@ -7,7 +7,9 @@ export interface MonthMetrics {
   /** Ontario / Québec consults separately (absent in data synced before this field existed). */
   on?: number | null;
   qc?: number | null;
-  /** All Up: Consults/hr */
+  /** "Consults/Hr Adj": consults per hour rounded to one decimal, as the sheet shows it. This is what clinicians see. */
+  rateAdj?: number | null;
+  /** All Up: Consults/hr (unrounded). Used for percentiles and for calculating ballots in the app. */
   rate: number | null;
   /** PSAT score for the month (0 / null when not enough encounters). */
   psat: number | null;

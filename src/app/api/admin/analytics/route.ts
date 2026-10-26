@@ -5,6 +5,7 @@ import { resolveMonthConfig } from "@/lib/config";
 import { computeBallots, computePool, isEligible, resolveBallots } from "@/lib/ballots";
 import { BALLOT_SOURCE } from "@/lib/ballotSource";
 import { isMonthKey } from "@/lib/months";
+import { displayRate } from "@/lib/rates";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +31,8 @@ export async function GET(req: Request) {
     const m = rec.months[month];
     const used = resolveBallots(m, cfg);
     if (!used.hasData) { missingData++; continue; }
-    rates.push(m!.rate as number);
+    const shown = displayRate(m);
+    if (shown !== null) rates.push(shown);
     // Only meaningful when the app calculates ballots itself; with BALLOT_SOURCE = "sheet" the sheet IS the answer.
     if (BALLOT_SOURCE === "rules" && m!.sheetBallots !== null && m!.sheetBallots !== computeBallots(m, cfg).ballots) mismatches++;
   }
