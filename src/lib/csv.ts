@@ -4,14 +4,24 @@ import { monthKeyFromSheetDate } from "./months";
 
 /**
  * Header-driven parser for the "Productivity" tab layout:
- *   row A: month label + date ("September", "09/01/2026") above each 7-column block
- *   row B: headers — Full Name, THVC Email, Status, Unique ID, then per month:
- *          ON | QC | SUM ON/QC | ON/QC Ratio | All Up: Consults/hr | PSAT | Ballots Earned
+ *   row A: month label + date ("September", "09/01/2026") above each month's block of columns
+ *   row B: headers: Full Name, THVC Email, Status, Unique ID, then per month a block such as
+ *          ON | QC | SUM ON/QC | ON/QC Ratio | All Up: Consults/hr | Consults/Hr Adj | PSAT | Ballots Earned
  *
- * Columns are located by header text and month-date cell, NOT by hard-coded letters,
- * so inserting a column or adding a new month block won't silently break lookups.
+ * Every column is found by its HEADER TEXT inside its own month's block, never by position, so:
+ *   - blocks can be 7 or 8 columns wide and can appear in any order (e.g. Jul/Aug after Dec);
+ *   - columns can move (PSAT shifted one place when "Consults/Hr Adj" was added);
+ *   - "Consults/Hr Adj" is deliberately never read. Consults per hour comes from "All Up: Consults/hr",
+ *     which is what the sheet's own Ballots Earned formula uses.
  */
-const BLOCK = { on: 0, qc: 1, sum: 2, ratio: 3, rate: 4, psat: 5, ballots: 6 } as const;
+const NAMES = {
+  on: "on consults",
+  qc: "qc consults",
+  sum: "sum on/qc consults",
+  rate: "all up: consults/hr",
+  psat: "psat",
+  ballots: "ballots earned"
+} as const;
 const norm = (v: unknown) => String(v ?? "").trim().toLowerCase();
 
 function num(v: unknown): number | null {
@@ -40,17 +50,33 @@ export function parseProductivityRows(rows: unknown[][], source: Dataset["source
   const iId = col("Unique ID");
   if (iEmail < 0 || iId < 0) throw new ParseError('Missing required column "THVC Email" or "Unique ID".');
 
-  // 2. Locate month blocks from the date row.
-  const blocks: { month: MonthKey; start: number }[] = [];
+  // 2. Locate month blocks from the date row, then each column by header text inside its own block.
+  const starts: { month: MonthKey; start: number }[] = [];
   dateRow.forEach((cell, idx) => {
     const key = monthKeyFromSheetDate(String(cell ?? ""));
     if (!key || idx === 0) return;
-    const start = idx - 1; // label sits one column left of the date
-    if (norm(header[start + BLOCK.rate]) !== "all up: consults/hr") return;
-    if (!blocks.some((b) => b.month === key)) blocks.push({ month: key, start });
+    if (!starts.some((b) => b.month === key)) starts.push({ month: key, start: idx - 1 }); // label sits one column left of the date
+  });
+  starts.sort((x, y) => x.start - y.start);
+
+  type Cols = { on: number; qc: number; sum: number; rate: number; psat: number; ballots: number };
+  const blocks: { month: MonthKey; cols: Cols }[] = [];
+  starts.forEach((b, i) => {
+    const end = i + 1 < starts.length ? starts[i + 1].start : header.length;
+    const find = (name: string) => {
+      for (let c = b.start; c < end; c++) if (norm(header[c]) === name) return c;
+      return -1;
+    };
+    const cols: Cols = {
+      on: find(NAMES.on), qc: find(NAMES.qc), sum: find(NAMES.sum),
+      rate: find(NAMES.rate), psat: find(NAMES.psat), ballots: find(NAMES.ballots)
+    };
+    // A block without these three can't produce correct ballots, so that month is left out rather than guessed.
+    if (cols.rate < 0 || cols.sum < 0 || cols.psat < 0) return;
+    blocks.push({ month: b.month, cols });
   });
   if (blocks.length === 0)
-    throw new ParseError('No month blocks found. Expected dates like 10/01/2026 above "All Up: Consults/hr" columns.');
+    throw new ParseError('No month blocks found. Expected dates like 10/01/2026 above columns headed "SUM ON/QC Consults", "All Up: Consults/hr" and "PSAT".');
 
   // 3. Build minimal records.
   const records: ClinicianRecord[] = [];
@@ -65,14 +91,15 @@ export function parseProductivityRows(rows: unknown[][], source: Dataset["source
     seen.add(key);
 
     const months: Record<MonthKey, MonthMetrics> = {};
+    const at = (c: number) => (c < 0 ? null : num(row[c]));
     for (const b of blocks) {
       months[b.month] = {
-                on: num(row[b.start + BLOCK.on]),
-        qc: num(row[b.start + BLOCK.qc]),
-        consults: num(row[b.start + BLOCK.sum]),
-        rate: num(row[b.start + BLOCK.rate]),
-        psat: num(row[b.start + BLOCK.psat]),
-        sheetBallots: num(row[b.start + BLOCK.ballots])
+        on: at(b.cols.on),
+        qc: at(b.cols.qc),
+        consults: at(b.cols.sum),
+        rate: at(b.cols.rate),
+        psat: at(b.cols.psat),
+        sheetBallots: at(b.cols.ballots)
       };
     }
     records.push({

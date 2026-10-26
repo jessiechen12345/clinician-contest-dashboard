@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { loadDataset, loadSettings } from "@/lib/store";
 import { resolveMonthConfig } from "@/lib/config";
-import { computeBallots, computePool, isEligible } from "@/lib/ballots";
+import { computeBallots, computePool, isEligible, resolveBallots } from "@/lib/ballots";
+import { BALLOT_SOURCE } from "@/lib/ballotSource";
 import { isMonthKey } from "@/lib/months";
 
 export const dynamic = "force-dynamic";
@@ -27,10 +28,11 @@ export async function GET(req: Request) {
   for (const rec of ds.records) {
     if (!isEligible(rec, settings)) { excludedByStatus++; continue; }
     const m = rec.months[month];
-    const r = computeBallots(m, cfg);
-    if (!r.hasData) { missingData++; continue; }
+    const used = resolveBallots(m, cfg);
+    if (!used.hasData) { missingData++; continue; }
     rates.push(m!.rate as number);
-    if (m!.sheetBallots !== null && m!.sheetBallots !== r.ballots) mismatches++;
+    // Only meaningful when the app calculates ballots itself; with BALLOT_SOURCE = "sheet" the sheet IS the answer.
+    if (BALLOT_SOURCE === "rules" && m!.sheetBallots !== null && m!.sheetBallots !== computeBallots(m, cfg).ballots) mismatches++;
   }
   rates.sort((x, y) => x - y);
   const pct = (p: number) => (rates.length ? rates[Math.min(rates.length - 1, Math.floor((p / 100) * rates.length))] : null);
@@ -43,7 +45,8 @@ export async function GET(req: Request) {
     distribution: pool.distribution,
     excludedByStatus,
     missingData,
-    sheetMismatches: mismatches,
+    sheetMismatches: BALLOT_SOURCE === "rules" ? mismatches : null,
+    ballotSource: BALLOT_SOURCE,
     rateP50: pct(50),
     rateP75: pct(75),
     rateP85: pct(85)

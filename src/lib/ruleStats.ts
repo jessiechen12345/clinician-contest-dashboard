@@ -1,4 +1,5 @@
-import { computeBallots, isEligible } from "./ballots";
+import { computeBallots, isEligible, resolveBallots } from "./ballots";
+import { BALLOT_SOURCE, type BallotSource } from "./ballotSource";
 import type { Dataset, MonthConfig, MonthKey, Settings } from "./types";
 
 export interface RuleStats {
@@ -15,15 +16,16 @@ export interface RuleStats {
 }
 
 /** How the ballot rules play out on the uploaded data for one month (counts only; no clinician details). */
-export function ballotRuleStats(ds: Dataset, settings: Settings, month: MonthKey, cfg: MonthConfig): RuleStats {
+export function ballotRuleStats(ds: Dataset, settings: Settings, month: MonthKey, cfg: MonthConfig, source: BallotSource = BALLOT_SOURCE): RuleStats {
   const s: RuleStats = {
     eligibleWithData: 0, metConsults: 0, metSatisfaction: 0, metBoth: 0, reachedThreshold: 0,
     blockedByConsults: 0, blockedBySatisfaction: 0, oneBallot: 0, twoBallots: 0, noBallots: 0
   };
   for (const rec of ds.records) {
     if (!isEligible(rec, settings)) continue;
-    const r = computeBallots(rec.months[month], cfg);
-    if (!r.hasData) continue;
+    const used = resolveBallots(rec.months[month], cfg, source);
+    if (!used.hasData) continue;
+    const r = computeBallots(rec.months[month], cfg); // the rule checks below are informational when ballots come from the sheet
     const met = (key: string) => r.checks.find((c) => c.key === key)?.met ?? true; // satisfaction rule off => met
     const volume = met("volume"), psat = met("psat"), target = met("target");
     s.eligibleWithData++;
@@ -35,8 +37,8 @@ export function ballotRuleStats(ds: Dataset, settings: Settings, month: MonthKey
       if (!volume) s.blockedByConsults++;
       else if (!psat) s.blockedBySatisfaction++;
     }
-    if (r.ballots === 2) s.twoBallots++;
-    else if (r.ballots === 1) s.oneBallot++;
+    if (used.ballots === 2) s.twoBallots++;
+    else if (used.ballots === 1) s.oneBallot++;
     else s.noBallots++;
   }
   return s;

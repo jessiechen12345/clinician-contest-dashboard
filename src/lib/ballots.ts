@@ -1,3 +1,4 @@
+import { BALLOT_SOURCE, type BallotSource } from "./ballotSource";
 import type {
   BallotResult,
   ClinicianRecord,
@@ -50,6 +51,27 @@ export function computeBallots(m: MonthMetrics | undefined, rules: Rules): Ballo
   return { ballots, hasData, checks, breakdown };
 }
 
+export interface ResolvedBallots {
+  ballots: 0 | 1 | 2;
+  hasData: boolean;
+}
+
+/**
+ * The ballots that count for one clinician in one month. With BALLOT_SOURCE = "sheet" this is the sheet's own
+ * "Ballots Earned" value (a month with no usable figures, or a blank Ballots Earned cell, counts as "no data" rather
+ * than a silent 0). With "rules" it is calculated from the settings.
+ */
+export function resolveBallots(m: MonthMetrics | undefined, rules: Rules, source: BallotSource = BALLOT_SOURCE): ResolvedBallots {
+  if (source === "rules") {
+    const r = computeBallots(m, rules);
+    return { ballots: r.ballots, hasData: r.hasData };
+  }
+  const hasData = !!m && m.rate !== null && m.consults !== null && m.sheetBallots !== null;
+  if (!hasData) return { ballots: 0, hasData: false };
+  const n = Math.round(m!.sheetBallots as number);
+  return { ballots: n <= 0 ? 0 : n >= 2 ? 2 : 1, hasData: true };
+}
+
 export function isEligible(rec: ClinicianRecord, settings: Settings): boolean {
   const allowed = settings.eligibleStatuses.map((s) => s.toLowerCase());
   return allowed.length === 0 || allowed.includes(rec.status.trim().toLowerCase());
@@ -63,14 +85,14 @@ export interface PoolStats {
   entries: { rec: ClinicianRecord; ballots: number }[];
 }
 
-export function computePool(ds: Dataset, settings: Settings, month: MonthKey, cfg: MonthConfig): PoolStats {
+export function computePool(ds: Dataset, settings: Settings, month: MonthKey, cfg: MonthConfig, source: BallotSource = BALLOT_SOURCE): PoolStats {
   const entries: PoolStats["entries"] = [];
   const distribution = { 0: 0, 1: 0, 2: 0 };
   let totalBallots = 0;
   let eligible = 0;
   for (const rec of ds.records) {
     if (!isEligible(rec, settings)) continue;
-    const r = computeBallots(rec.months[month], cfg);
+    const r = resolveBallots(rec.months[month], cfg, source);
     if (!r.hasData) continue;
     eligible++;
     distribution[r.ballots]++;

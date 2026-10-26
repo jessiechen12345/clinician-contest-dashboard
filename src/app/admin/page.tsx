@@ -172,13 +172,13 @@ function SettingsCard({ meta, month, reload }: { meta: any; month: string; reloa
         <label className="sm:col-span-4">Prizes (one per line)<textarea className={input} rows={3} value={f.prizes} onChange={set("prizes")} /></label>
       </div>
       <p className="mt-4 text-sm text-teal-800">The public page opens on the current month once it begins (never before November 2026). Earlier months stay in its month list.</p>
-      <p className="mt-2 text-sm text-teal-800">Minimum consults and minimum Patient Satisfaction Score needed to earn a ballot. Set the score to 0 to turn that rule off.</p>
+      <p className="mt-2 text-sm text-teal-800">The two thresholds are shown on the dashboard. Minimum consults and minimum Patient Satisfaction Score are used only if ballots are calculated in the app. While ballots come from the sheet&apos;s Ballots Earned column they have no effect.</p>
       <button
         type="button"
         className="mt-2 text-sm underline"
         onClick={() => setF({ ...f, target: String(DEFAULT_RULES.target), stretch: String(DEFAULT_RULES.stretch), minConsults: String(DEFAULT_RULES.minConsults), minPsat: String(DEFAULT_RULES.minPsat) })}
       >
-        Reset the four rule numbers to the spreadsheet&apos;s ({DEFAULT_RULES.minConsults} consults, {DEFAULT_RULES.minPsat} satisfaction, {DEFAULT_RULES.target.toFixed(2)} and {DEFAULT_RULES.stretch.toFixed(2)} per hour). Then press Save.
+        Reset the four rule numbers to the defaults ({DEFAULT_RULES.minConsults} consults, {DEFAULT_RULES.minPsat} satisfaction, {DEFAULT_RULES.target.toFixed(2)} and {DEFAULT_RULES.stretch.toFixed(2)} per hour). Then press Save.
       </button>
       <div className="mt-4"><button className={btn}>Save settings</button></div>
       <Notice n={n} />
@@ -252,6 +252,21 @@ function RulesCard({ month }: { month: string }) {
 
   const { rules, counts } = r;
   const rate = (n: number) => n.toFixed(2);
+  if (r.source === "sheet") {
+    const nn = (x: number) => x.toLocaleString("en-CA");
+    return (
+      <section className={card} aria-labelledby="rules-h">
+        <h2 id="rules-h" className="text-xl font-bold">How ballots are earned for {month}</h2>
+        <p className="mt-2">Ballots come straight from the <strong>Ballots Earned</strong> column of the uploaded sheet. The dashboard and the draw use exactly what the sheet says; the app does not recalculate them.</p>
+        <p className="mt-2 text-sm text-teal-800">The rules themselves (minimum consults, Patient Satisfaction Score, thresholds) are applied in the sheet.</p>
+        {!counts ? (
+          <p className="mt-3 text-sm">Upload data that includes {month} to see this.</p>
+        ) : (
+          <p className="mt-3">Of <strong>{nn(counts.eligibleWithData)}</strong> eligible clinicians with figures this month, <strong>{nn(counts.twoBallots)}</strong> earned 2 ballots, <strong>{nn(counts.oneBallot)}</strong> earned 1, and <strong>{nn(counts.noBallots)}</strong> earned none. That is <strong>{nn(counts.twoBallots * 2 + counts.oneBallot)}</strong> ballots in total.</p>
+        )}
+      </section>
+    );
+  }
   const differences: string[] = [];
   if (rules.minConsults !== DEFAULT_RULES.minConsults) differences.push(`minimum consults ${rules.minConsults} (spreadsheet: ${DEFAULT_RULES.minConsults})`);
   if (rules.minPsat !== DEFAULT_RULES.minPsat) differences.push(`minimum satisfaction ${rules.minPsat} (spreadsheet: ${DEFAULT_RULES.minPsat})`);
@@ -372,7 +387,9 @@ function AnalyticsCard({ month, hasData }: { month: string; hasData: boolean }) 
       </ul>
       <p className="mt-4 text-sm">Consults per hour percentiles: 50th {a.rateP50?.toFixed(2) ?? "—"}, 75th {a.rateP75?.toFixed(2) ?? "—"}, 85th {a.rateP85?.toFixed(2) ?? "—"}. Excluded by status: {a.excludedByStatus}.</p>
       <p className={`mt-2 text-sm ${a.sheetMismatches ? "font-bold text-alert" : ""}`}>
-        {a.sheetMismatches
+        {a.sheetMismatches === null
+          ? `Ballot counts come straight from the sheet's "Ballots Earned" column.`
+          : a.sheetMismatches
           ? `${a.sheetMismatches} clinicians have a different ballot count than the spreadsheet's "Ballots Earned" column. Check the thresholds above.`
           : `Ballot counts match the spreadsheet's "Ballots Earned" column.`}
       </p>

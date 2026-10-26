@@ -4,7 +4,7 @@ import { currentMonthKey, monthBounds } from "./months";
 export const DEFAULT_RULES = {
   target: 2.0, // 75th percentile
   stretch: 2.15, // 85th percentile
-  minConsults: 70, // mirrors the sheet's AND(SUM ON/QC >= 70, ...)
+  minConsults: 20, // minimum consults to qualify (was 70; the sheet now uses 20). Only used when BALLOT_SOURCE is "rules".
   minPsat: 4.65 // mirrors the sheet's PSAT gate
 } as const;
 

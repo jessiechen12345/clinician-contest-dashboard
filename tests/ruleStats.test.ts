@@ -8,12 +8,12 @@ import { ballotRuleStats } from "../src/lib/ruleStats";
 
 const ds = parseProductivityCsv(readFileSync(path.join(__dirname, "../sample-data/Contests_Ballot_Calculation_Productivity.sample.csv"), "utf8"));
 const settings = { ...defaultSettings(), activeMonth: "2026-09" };
-const cfg = resolveMonthConfig(settings, "2026-09");
+const cfg = { ...resolveMonthConfig(settings, "2026-09"), minConsults: 70 }; // sample file was built with the old 70-consult rule
 
 describe("ballot rule statistics", () => {
-  const s = ballotRuleStats(ds, settings, "2026-09", cfg);
+  const s = ballotRuleStats(ds, settings, "2026-09", cfg, "rules");
   it("agrees with the ballot pool", () => {
-    const pool = computePool(ds, settings, "2026-09", cfg);
+    const pool = computePool(ds, settings, "2026-09", cfg, "rules");
     expect(s.eligibleWithData).toBe(pool.eligible);
     expect(s.oneBallot + s.twoBallots * 2).toBe(pool.totalBallots);
     expect(s.oneBallot + s.twoBallots + s.noBallots).toBe(s.eligibleWithData);
@@ -28,9 +28,17 @@ describe("ballot rule statistics", () => {
     expect(s.blockedBySatisfaction).toBeGreaterThanOrEqual(1);
   });
   it("turning the satisfaction rule off removes those blocks", () => {
-    const off = ballotRuleStats(ds, settings, "2026-09", { ...cfg, minPsat: 0 });
+    const off = ballotRuleStats(ds, settings, "2026-09", { ...cfg, minPsat: 0 }, "rules");
     expect(off.blockedBySatisfaction).toBe(0);
     expect(off.metSatisfaction).toBe(off.eligibleWithData);
     expect(DEFAULT_RULES.minPsat).toBe(4.65);
+  });
+  it("with ballots coming from the sheet, the counts are the sheet's own Ballots Earned values", () => {
+    const sheet = ballotRuleStats(ds, settings, "2026-09", cfg, "sheet");
+    const elig = ds.records.filter((r) => r.status === "Active" && r.months["2026-09"].rate !== null && r.months["2026-09"].sheetBallots !== null);
+    const count = (n: number) => elig.filter((r) => Math.min(2, Math.round(r.months["2026-09"].sheetBallots as number)) === n).length;
+    expect(sheet.twoBallots).toBe(count(2));
+    expect(sheet.oneBallot).toBe(count(1));
+    expect(sheet.noBallots).toBe(count(0));
   });
 });

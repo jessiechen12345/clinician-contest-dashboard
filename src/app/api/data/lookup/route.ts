@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { computeBallots, isEligible } from "@/lib/ballots";
+import { isEligible, resolveBallots } from "@/lib/ballots";
 import { resolveMonthConfig } from "@/lib/config";
 import { monthLabel } from "@/lib/months";
 import { clientIp, rateLimited } from "@/lib/rateLimit";
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
   if (!rec || !isEligible(rec, settings)) return NextResponse.json(NOT_FOUND, { status: 404 });
 
   const cfg = resolveMonthConfig(settings, month);
-  const result = computeBallots(rec.months[month], cfg);
+  const result = resolveBallots(rec.months[month], cfg);
   if (!result.hasData) {
     return NextResponse.json(
       { error: "no_month_data", message: `We found your record, but there's no data for ${monthLabel(month)} yet.` },
