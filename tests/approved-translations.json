@@ -56,5 +56,7 @@
  "Password": "Mot de passe",
  "Continue": "Continuer",
  "That password isn't right. Try again.": "Ce mot de passe est incorrecte. Réessayez.",
- "Too many attempts. Wait a few minutes and try again.": "Trop de tentatives. Veuillez attendre quelques minutes et réessayez."
+ "Too many attempts. Wait a few minutes and try again.": "Trop de tentatives. Veuillez attendre quelques minutes et réessayez.",
+ "For multi-licensed clinicians, Ontario and Québec consults are combined.": "Pour les clinicien·nes titulaires de plusieurs permis, les consultations en Ontario et au Québec sont combinées.",
+ "Check your ballots": "Vérifiez vos bulletins de participation"
 }

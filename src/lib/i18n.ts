@@ -10,7 +10,7 @@ const NB = "\u00a0"; // non-breaking space (French puts one before ? : ;)
 
 const en = {
   brand: "Care Capacity Initiative",
-  headline: "Check your ballots & winning odds",
+  headline: "Check your ballots",
   overviewTitle: "{month} overview",
   month: "Month",
   prizes: "Prizes",
@@ -53,8 +53,7 @@ const en = {
   errUnavailable: "We couldn't load the latest figures. Please try again shortly.",
   errNetwork: "Couldn't reach the server. Check your connection and try again.",
   errGeneric: "Something went wrong. Try again.",
-  footer:
-    "For multi-licensed clinicians, Ontario and Québec consults are combined. Winning odds shown are for a single prize draw; with multiple prizes your overall chance is higher.",
+  footer: "For multi-licensed clinicians, Ontario and Québec consults are combined.",
   language: "Language",
   ballotOne: "{n} ballot",
   ballotMany: "{n} ballots",
@@ -69,7 +68,7 @@ export type Key = keyof typeof en;
 
 const fr: Record<Key, string> = {
   brand: "Initiative Capacité de soins",
-  headline: "Vérifiez vos bulletins de participation et vos chances de gagner",
+  headline: "Vérifiez vos bulletins de participation",
   overviewTitle: "Aperçu {de_month}",
   month: "Mois",
   prizes: "Prix",
@@ -112,7 +111,7 @@ const fr: Record<Key, string> = {
   errUnavailable: "Nous n’avons pas pu charger les derniers chiffres. Veuillez réessayer sous peu.",
   errNetwork: "Impossible d’atteindre le serveur. Vérifiez votre connexion et réessayez.",
   errGeneric: "Une erreur est survenue. Réessayez.",
-  footer: `Pour les clinicien·nes titulaires de plusieurs permis, les consultations en Ontario et au Québec sont combinées. Les probabilités de gagner indiquées concernent un tirage au sort unique${NB}; avec plusieurs prix, vos chances globales sont plus élevées.`,
+  footer: "Pour les clinicien·nes titulaires de plusieurs permis, les consultations en Ontario et au Québec sont combinées.",
   language: "Langue",
   ballotOne: "{n} bulletin",
   ballotMany: "{n} bulletins",

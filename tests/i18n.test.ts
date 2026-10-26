@@ -105,3 +105,24 @@ describe("approved translations are never changed unless the English changes", (
       expect(nbsp(DICTIONARIES.fr[key]), `French changed: ${key}`).toBe(approved[DICTIONARIES.en[key]]);
   });
 });
+
+describe("footer", () => {
+  it("keeps only the multi-licensed clinicians sentence (the winning-odds / prize-draw sentence was removed on request)", () => {
+    expect(DICTIONARIES.en.footer).toBe("For multi-licensed clinicians, Ontario and Québec consults are combined.");
+    expect(DICTIONARIES.fr.footer).toBe("Pour les clinicien·nes titulaires de plusieurs permis, les consultations en Ontario et au Québec sont combinées.");
+    for (const lang of ["en", "fr"] as const) expect(DICTIONARIES[lang].footer).not.toMatch(/winning odds|prize|chances|probabilit|tirage|prix/i);
+  });
+});
+
+describe("headline", () => {
+  it("is just 'Check your ballots' (no mention of winning odds) in both languages", () => {
+    expect(DICTIONARIES.en.headline).toBe("Check your ballots");
+    expect(DICTIONARIES.fr.headline).toBe("Vérifiez vos bulletins de participation");
+    for (const lang of ["en", "fr"] as const) expect(DICTIONARIES[lang].headline).not.toMatch(/odds|chances/i);
+  });
+  it("nothing on the public pages mentions winning odds any more", () => {
+    for (const lang of ["en", "fr"] as const)
+      for (const [k, v] of Object.entries(DICTIONARIES[lang])) expect(v, `${lang}.${k}`).not.toMatch(/winning odds|chances de gagner|probabilit|prize draw|tirage au sort/i);
+  });
+});
+
