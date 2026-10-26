@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { fmtDateTime } from "@/lib/format";
 import { DEFAULT_RULES } from "@/lib/config";
+import { LAUNCH_MONTH, startingMonthKey } from "@/lib/launch";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const card = "rounded-xl border border-teal-200 bg-white p-5 sm:p-6";
@@ -72,7 +73,7 @@ export default function AdminPage() {
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { load(startingMonthKey()); }, [load]);
 
   async function signOut() {
     await fetch("/api/admin-login", { method: "DELETE" });
@@ -80,7 +81,7 @@ export default function AdminPage() {
   }
 
   if (checking) return <p className="p-8">Loading…</p>;
-  if (!meta) return <AdminLogin onDone={() => { setChecking(true); load(); }} />;
+  if (!meta) return <AdminLogin onDone={() => { setChecking(true); load(startingMonthKey()); }} />;
   const months: string[] = meta.dataset?.months ?? [];
 
   return (
@@ -101,7 +102,7 @@ export default function AdminPage() {
           <label className="text-sm">
             <span className="mb-1 block text-teal-800">Managing month</span>
             <select className={input} value={month} onChange={(e) => load(e.target.value)}>
-              {Array.from(new Set([...(months), meta.settings.activeMonth])).sort().map((m) => <option key={m}>{m}</option>)}
+              {Array.from(new Set([...months.filter((m) => m >= LAUNCH_MONTH), month, startingMonthKey()])).sort().map((m) => <option key={m}>{m}</option>)}
             </select>
           </label>
           {meta.storageMode === "local-file" && (
@@ -115,6 +116,7 @@ export default function AdminPage() {
         <SettingsCard key={month} meta={meta} month={month} reload={() => load(month)} />
         <RulesCard key={`rules-${month}-${JSON.stringify(meta.config)}-${meta.dataset?.syncedAt}`} month={month} />
         <GateCard />
+        <AdminsCard />
         <AnalyticsCard key={`a-${month}-${meta.dataset?.syncedAt}-${JSON.stringify(meta.config)}`} month={month} hasData={months.includes(month)} />
         <DrawCard key={`d-${month}`} month={month} hasData={months.includes(month)} cfg={meta.config} reload={() => load(month)} />
       </main>
@@ -132,7 +134,7 @@ function SettingsCard({ meta, month, reload }: { meta: any; month: string; reloa
   const [f, setF] = useState({
     target: String(c.target), stretch: String(c.stretch), minConsults: String(c.minConsults), minPsat: String(c.minPsat),
     startDate: c.startDate, endDate: c.endDate, prizes: (c.prizes as string[]).join("\n"),
-    eligible: (meta.settings.eligibleStatuses as string[]).join(", "), makeActive: meta.settings.activeMonth === month
+    eligible: (meta.settings.eligibleStatuses as string[]).join(", ")
   });
   const [n, setN] = useState<any>(null);
   const set = (k: string) => (e: any) => setF({ ...f, [k]: e.target.type === "checkbox" ? e.target.checked : e.target.value });
@@ -144,7 +146,6 @@ function SettingsCard({ meta, month, reload }: { meta: any; month: string; reloa
         method: "PUT", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           month,
-          activeMonth: f.makeActive ? month : undefined,
           eligibleStatuses: f.eligible.split(",").map((s) => s.trim()).filter(Boolean),
           config: {
             target: Number(f.target), stretch: Number(f.stretch), minConsults: Number(f.minConsults), minPsat: Number(f.minPsat),
@@ -170,7 +171,7 @@ function SettingsCard({ meta, month, reload }: { meta: any; month: string; reloa
         <label className="sm:col-span-2">Eligible statuses (comma-separated)<input className={input} value={f.eligible} onChange={set("eligible")} /></label>
         <label className="sm:col-span-4">Prizes (one per line)<textarea className={input} rows={3} value={f.prizes} onChange={set("prizes")} /></label>
       </div>
-      <label className="mt-4 flex items-center gap-2"><input type="checkbox" checked={f.makeActive} onChange={set("makeActive")} className="h-5 w-5" /> Show this month on the public page by default</label>
+      <p className="mt-4 text-sm text-teal-800">The public page opens on the current month once it begins (never before November 2026). Earlier months stay in its month list.</p>
       <p className="mt-2 text-sm text-teal-800">Minimum consults and minimum Patient Satisfaction Score needed to earn a ballot. Set the score to 0 to turn that rule off.</p>
       <button
         type="button"
@@ -299,6 +300,36 @@ function RulesCard({ month }: { month: string }) {
           <p className="mt-3 text-sm">Result: <strong>{n(counts.twoBallots)}</strong> earned 2 ballots, <strong>{n(counts.oneBallot)}</strong> earned 1, and <strong>{n(counts.noBallots)}</strong> earned none.</p>
         </>
       )}
+    </section>
+  );
+}
+
+function AdminsCard() {
+  const [d, setD] = useState<any>(null);
+  const [err, setErr] = useState<string | null>(null);
+  useEffect(() => { api("/api/admin/admins").then(setD).catch((e) => setErr(e.message)); }, []);
+  if (err) return <section className={card}><p role="alert" className="text-alert">{err}</p></section>;
+  if (!d) return <section className={card}>Loading…</section>;
+  return (
+    <section className={card} aria-labelledby="admins-h">
+      <h2 id="admins-h" className="text-xl font-bold">Who can sign in here</h2>
+      <p className="mt-2 text-sm text-teal-800">
+        This is what the live site has loaded from the ADMIN_EMAILS setting ({d.approved.length} {d.approved.length === 1 ? "person" : "people"}).
+        Everyone uses the same admin password.
+      </p>
+      <ul className="mt-3 space-y-1">
+        {d.approved.map((a: any) => (
+          <li key={a.email}>
+            {a.email}
+            {a.email === d.you && <span className="ml-2 text-sm text-teal-700">(you)</span>}
+            {!a.looksValid && <span className="ml-2 rounded bg-alert-soft px-2 py-0.5 text-sm text-alert">doesn&apos;t look like an email address, check the spelling</span>}
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 text-sm">
+        Someone missing? Add the address to ADMIN_EMAILS in Vercel (Settings, Environment Variables, tick Production), then redeploy.
+        This copy of the site: <strong>{d.environment}</strong>{d.version ? <> · version <code>{d.version}</code></> : null}.
+      </p>
     </section>
   );
 }

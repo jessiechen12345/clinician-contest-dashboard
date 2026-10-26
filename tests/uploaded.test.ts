@@ -10,10 +10,12 @@ const ds = parseProductivityCsv(csv);
 const settings = { ...defaultSettings(), activeMonth: "2026-09" };
 
 describe("uploaded data helpers", () => {
-  it("lists the months found in the upload and falls back sensibly", () => {
-    expect(monthChoices(ds).map((m) => m.label)).toEqual(["September 2026", "October 2026", "November 2026", "December 2026"]);
-    expect(resolveMonth(ds, settings, "2026-10")).toBe("2026-10");
-    expect(resolveMonth(ds, settings, "2031-01")).toBe("2026-09");
+  it("offers only launch-onward months that have begun, and falls back sensibly", () => {
+    const dec = new Date("2026-12-02T18:00:00Z");
+    expect(monthChoices(ds, dec).map((m) => m.label)).toEqual(["November 2026", "December 2026"]);
+    expect(resolveMonth(ds, settings, "2026-11", dec)).toBe("2026-11");
+    expect(resolveMonth(ds, settings, "2026-10", dec)).toBe("2026-12"); // October is no longer available
+    expect(resolveMonth(ds, settings, "2031-01", dec)).toBe("2026-12");
   });
   it("sums combined consults and averages satisfaction over eligible clinicians", () => {
     const elig = ds.records.filter((r) => r.status === "Active" && r.months["2026-09"].rate !== null);

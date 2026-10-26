@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "fs";
+import path from "path";
 import {
   DICTIONARIES, ballotsLabel, deMonth, fmtInt, fmtPercent, fmtRate, langFromAcceptLanguage, localizePrize, monthName, pickInitialLang, satisfaction, t
 } from "../src/lib/i18n";
@@ -87,5 +89,19 @@ describe("prizes", () => {
     expect(localizePrize("$100 gift card | Carte-cadeau de 100 $", "fr")).toBe("Carte-cadeau de 100 $");
     expect(localizePrize("$100 gift card | Carte-cadeau de 100 $", "en")).toBe("$100 gift card");
     expect(localizePrize("Extra day off", "fr")).toBe("Extra day off");
+  });
+});
+
+describe("approved translations are never changed unless the English changes", () => {
+  // tests/approved-translations.json = every English line the French reviewer saw, with the French they approved
+  // (their correction where they made one). Removing a line is fine; changing English or approved French is not.
+  const approved: Record<string, string> = JSON.parse(readFileSync(path.join(__dirname, "approved-translations.json"), "utf8"));
+  const nbsp = (s: string) => s.replace(/\u00a0/g, " ");
+  it("every English line in the app is one the reviewer saw", () => {
+    for (const [key, text] of Object.entries(DICTIONARIES.en)) expect(Object.keys(approved), `English changed: ${key}`).toContain(text);
+  });
+  it("every French line is exactly what the reviewer approved", () => {
+    for (const key of Object.keys(DICTIONARIES.en) as (keyof typeof DICTIONARIES.en)[])
+      expect(nbsp(DICTIONARIES.fr[key]), `French changed: ${key}`).toBe(approved[DICTIONARIES.en[key]]);
   });
 });

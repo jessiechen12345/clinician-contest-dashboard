@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { computeBallots, computePool, formatOdds, isEligible } from "@/lib/ballots";
+import { computeBallots, isEligible } from "@/lib/ballots";
 import { resolveMonthConfig } from "@/lib/config";
 import { monthLabel } from "@/lib/months";
 import { clientIp, rateLimited } from "@/lib/rateLimit";
@@ -16,7 +16,7 @@ const NOT_FOUND = {
 
 /**
  * POST { clinicianId, month? }. Matches ONLY on the Unique ID and returns that one clinician's numbers
- * plus the anonymous pool size. The rest of the data never leaves the server.
+ * (consults per hour, total consults, satisfaction score, ballots). Nothing about other clinicians or the pool is returned.
  */
 export async function POST(req: Request) {
   if (await rateLimited(clientIp(req), "lookup", LIMIT)) {
@@ -52,16 +52,12 @@ export async function POST(req: Request) {
   }
 
   const m = rec.months[month];
-  const pool = computePool(ds, settings, month, cfg);
-  const odds = formatOdds(result.ballots, pool.totalBallots);
   return NextResponse.json({
     month,
     monthLabel: monthLabel(month),
     consultsPerHour: m.rate,
     totalConsults: m.consults,
     satisfaction: m.psat && m.psat > 0 ? m.psat : null,
-    ballots: result.ballots,
-    totalBallots: pool.totalBallots,
-    odds: { percent: odds.percent, oneIn: odds.oneIn }
+    ballots: result.ballots
   });
 }

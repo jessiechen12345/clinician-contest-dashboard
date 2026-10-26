@@ -1,6 +1,7 @@
 import { computePool, isEligible } from "./ballots";
 import { defaultSettings } from "./config";
-import { isMonthKey, monthLabel } from "./months";
+import { monthLabel } from "./months";
+import { pickMonth, visibleMonths } from "./launch";
 import { loadSettings } from "./store";
 import type { Dataset, MonthKey, Settings } from "./types";
 
@@ -13,13 +14,14 @@ export async function safeSettings(): Promise<Settings> {
   }
 }
 
-export const monthChoices = (ds: Dataset) => ds.months.map((key) => ({ key, label: monthLabel(key) }));
+export const monthChoices = (ds: Dataset, now: Date = new Date()) => visibleMonths(ds.months, now).map((key) => ({ key, label: monthLabel(key) }));
 
-/** Requested month if the upload has it; otherwise the admin's active month; otherwise the latest month uploaded. */
-export function resolveMonth(ds: Dataset, settings: Settings, requested: unknown): MonthKey {
-  if (isMonthKey(requested) && ds.months.includes(requested)) return requested;
-  if (ds.months.includes(settings.activeMonth)) return settings.activeMonth;
-  return ds.months[ds.months.length - 1];
+/**
+ * The requested month if it is allowed (launch month onward, not in the future); otherwise the current month once it
+ * has begun, or the latest earlier month. The admin's "active month" setting is no longer used.
+ */
+export function resolveMonth(ds: Dataset, _settings: Settings, requested: unknown, now: Date = new Date()): MonthKey {
+  return pickMonth(visibleMonths(ds.months, now), requested, now);
 }
 
 function eligibleWithData(ds: Dataset, settings: Settings, month: MonthKey) {

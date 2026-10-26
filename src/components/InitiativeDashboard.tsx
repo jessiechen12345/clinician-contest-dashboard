@@ -4,9 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import StatCard from "./StatCard";
 import LanguageToggle from "./LanguageToggle";
 import { DEFAULT_RULES } from "@/lib/config";
-import { currentMonthKey, monthBounds } from "@/lib/months";
+import { monthBounds } from "@/lib/months";
+import { startingMonthKey } from "@/lib/launch";
 import {
-  Lang, ballotsLabel, capitalize, deMonth, fmtDateTime, fmtInt, fmtPercent, fmtRate, localizePrize, monthName, persistLang, satisfaction, t
+  Lang, ballotsLabel, capitalize, deMonth, fmtDateTime, fmtInt, fmtRate, localizePrize, monthName, persistLang, satisfaction, t
 } from "@/lib/i18n";
 
 interface Summary {
@@ -21,7 +22,6 @@ interface Summary {
   startDate?: string;
   endDate?: string;
   lastDrawAt?: string | null;
-  totalBallots?: number | null;
   totalConsults?: number | null;
   satisfaction?: number | null;
   lastSyncAt?: string;
@@ -32,8 +32,6 @@ interface Mine {
   totalConsults: number | null;
   satisfaction: number | null;
   ballots: number;
-  totalBallots: number;
-  odds: { oneIn: number | null };
 }
 
 type LoadState = "loading" | "ready" | "error";
@@ -110,7 +108,7 @@ export default function InitiativeDashboard({ apiBase = "/api/metabase", initial
   }
 
   // ---- values, with defaults so every section can render ----
-  const activeMonth = month ?? sum?.month ?? currentMonthKey();
+  const activeMonth = month ?? sum?.month ?? startingMonthKey();
   const bounds = monthBounds(activeMonth);
   const monthText = monthName(activeMonth, lang);
   const monthVars = { month: monthText, de_month: deMonth(activeMonth, lang) };
@@ -190,15 +188,10 @@ export default function InitiativeDashboard({ apiBase = "/api/metabase", initial
 
         {notice && <p role="status" className="mt-4 rounded-lg border border-teal-200 bg-white px-4 py-3 text-sm">{notice}</p>}
 
-        {/* 3. Thresholds + total ballots */}
-        <dl className="mt-6 grid gap-4 md:grid-cols-3">
+        {/* 3. Thresholds */}
+        <dl className="mt-6 grid gap-4 md:grid-cols-2">
           <StatCard label={t(lang, "monthlyThreshold")} value={fmtRate(threshold, lang)} unit={t(lang, "perHour")} chip={ballotsLabel(lang, 1)} />
           <StatCard label={t(lang, "stretchThreshold")} value={fmtRate(stretch, lang)} unit={t(lang, "perHour")} chip={ballotsLabel(lang, 2)} />
-          <StatCard
-            label={t(lang, "totalBallots")}
-            value={live && sum?.totalBallots != null ? fmtInt(sum.totalBallots, lang) : DASH}
-            detail={t(lang, "totalBallotsNote")}
-          />
         </dl>
 
         {/* 4. Combined consults + satisfaction */}
@@ -252,26 +245,15 @@ export default function InitiativeDashboard({ apiBase = "/api/metabase", initial
           {mine && (
             <div className="mt-6 border-t border-teal-100 pt-6" aria-live="polite">
               <h3 className="text-xl font-bold">{t(lang, "resultsTitle", monthVars)}</h3>
-              <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <StatCard label={t(lang, "rate")} value={fmtRate(mine.consultsPerHour, lang)} />
                 <StatCard label={t(lang, "mineTotalConsults")} value={fmtInt(mine.totalConsults, lang)} />
                 <StatCard label={t(lang, "satisfactionScore")} value={mySat.value} unit={mySat.unit} />
-              </dl>
-              <dl className="mt-4 grid gap-4 sm:grid-cols-2">
                 <StatCard
                   label={t(lang, "ballotsEarned")}
                   value={String(mine.ballots)}
                   chip={mine.ballots >= 2 ? t(lang, "thresholdPlusStretch") : mine.ballots === 1 ? t(lang, "thresholdBallot") : undefined}
                   detail={mine.ballots === 0 ? t(lang, "noBallots") : undefined}
-                />
-                <StatCard
-                  label={t(lang, "winningOdds")}
-                  value={fmtPercent(mine.ballots > 0 && mine.totalBallots > 0 ? mine.ballots / mine.totalBallots : 0, lang)}
-                  detail={
-                    mine.odds.oneIn
-                      ? t(lang, "oddsDetail", { n: fmtInt(mine.odds.oneIn, lang), b: mine.ballots, t: fmtInt(mine.totalBallots, lang) })
-                      : t(lang, "earnBallot")
-                  }
                 />
               </dl>
             </div>
