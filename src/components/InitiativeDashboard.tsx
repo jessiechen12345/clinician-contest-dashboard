@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import StatCard from "./StatCard";
 import LanguageToggle from "./LanguageToggle";
+import RichText from "./RichText";
 import { DEFAULT_RULES } from "@/lib/config";
 import { monthBounds } from "@/lib/months";
 import { startingMonthKey } from "@/lib/launch";
@@ -166,7 +167,7 @@ export default function InitiativeDashboard({ apiBase = "/api/metabase", initial
             <div>
               <h3 className={`${label} text-teal-200`}>{t(lang, "prizes")}</h3>
               <ul className="mt-3 list-inside list-disc space-y-1 text-lg">
-                {prizes.length ? prizes.map((p) => <li key={p.raw}>{p.text}</li>) : <li>{t(lang, "prizeTbd")}</li>}
+                {prizes.length ? prizes.map((p) => <li key={p.raw}><RichText text={p.text} /></li>) : <li>{t(lang, "prizeTbd")}</li>}
               </ul>
             </div>
             <dl className="space-y-3">

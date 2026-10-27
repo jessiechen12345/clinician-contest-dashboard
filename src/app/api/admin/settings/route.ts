@@ -54,13 +54,17 @@ export async function PUT(req: Request) {
     ...(dateStr(c.startDate) && { startDate: dateStr(c.startDate) }),
     ...(dateStr(c.endDate) && { endDate: dateStr(c.endDate) }),
     ...(Array.isArray(c.prizes) && {
-      prizes: c.prizes.map((p: unknown) => String(p).trim().slice(0, 120)).filter(Boolean).slice(0, 20)
+      prizes: c.prizes.map((p: unknown) => String(p).trim().slice(0, 1000)).filter(Boolean).slice(0, 20)
     })
   };
   if (typeof body.activeMonth === "string" && isMonthKey(body.activeMonth)) settings.activeMonth = body.activeMonth;
   if (Array.isArray(body.eligibleStatuses))
     settings.eligibleStatuses = body.eligibleStatuses.map((s: unknown) => String(s).trim()).filter(Boolean);
 
-  await saveSettings(settings);
+  try {
+    await saveSettings(settings);
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : "Couldn't save settings." }, { status: 500 });
+  }
   return NextResponse.json({ ok: true });
 }

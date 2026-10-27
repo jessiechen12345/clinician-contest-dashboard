@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import RichText from "@/components/RichText";
+import { localizePrize } from "@/lib/i18n";
 import { fmtDateTime } from "@/lib/format";
 import { DEFAULT_RULES } from "@/lib/config";
 import { LAUNCH_MONTH, startingMonthKey } from "@/lib/launch";
@@ -129,6 +131,27 @@ function Notice({ n }: { n: { ok: boolean; text: string } | null }) {
   return <p role={n.ok ? "status" : "alert"} className={`mt-3 rounded-md p-3 ${n.ok ? "bg-teal-100" : "bg-alert-soft text-alert"}`}>{n.text}</p>;
 }
 
+function PrizePreview({ text }: { text: string }) {
+  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+  if (!lines.length) return null;
+  return (
+    <div className="mt-3 rounded-lg border border-teal-200 bg-teal-50 p-3" aria-label="Preview of the prizes">
+      <p className="text-sm font-bold text-teal-800">Preview</p>
+      <div className="mt-2 grid gap-4 sm:grid-cols-2">
+        {(["en", "fr"] as const).map((lang) => (
+          <div key={lang}>
+            <p className="text-xs font-bold uppercase tracking-wider text-teal-700">{lang === "en" ? "English" : "Français"}</p>
+            <ul className="mt-1 list-inside list-disc space-y-1">
+              {lines.map((l, i) => <li key={i}><RichText text={localizePrize(l, lang)} /></li>)}
+            </ul>
+          </div>
+        ))}
+      </div>
+      {lines.some((l) => !l.includes("|")) && <p className="mt-2 text-sm text-teal-800">A line without | shows the same text in both languages.</p>}
+    </div>
+  );
+}
+
 function SettingsCard({ meta, month, reload }: { meta: any; month: string; reload: () => void }) {
   const c = meta.config;
   const [f, setF] = useState({
@@ -138,6 +161,21 @@ function SettingsCard({ meta, month, reload }: { meta: any; month: string; reloa
   });
   const [n, setN] = useState<any>(null);
   const set = (k: string) => (e: any) => setF({ ...f, [k]: e.target.type === "checkbox" ? e.target.checked : e.target.value });
+  const prizesRef = useRef<HTMLTextAreaElement>(null);
+
+  /** Wrap the selected words in ** (bold) or __ (underline); press again on the same selection to remove it. */
+  function wrapSelection(marker: "**" | "__") {
+    const el = prizesRef.current;
+    if (!el) return;
+    const { selectionStart: a, selectionEnd: b, value } = el;
+    if (a === b) return setN({ ok: false, text: "Select the words first, then press B or U." });
+    const sel = value.slice(a, b);
+    const already = sel.length >= marker.length * 2 && sel.startsWith(marker) && sel.endsWith(marker);
+    const out = already ? sel.slice(marker.length, -marker.length) : marker + sel + marker;
+    setN(null);
+    setF({ ...f, prizes: value.slice(0, a) + out + value.slice(b) });
+    requestAnimationFrame(() => { el.focus(); el.setSelectionRange(a, a + out.length); });
+  }
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -169,7 +207,20 @@ function SettingsCard({ meta, month, reload }: { meta: any; month: string; reloa
         <label>Start date<input className={input} type="date" value={f.startDate} onChange={set("startDate")} /></label>
         <label>End date<input className={input} type="date" value={f.endDate} onChange={set("endDate")} /></label>
         <label className="sm:col-span-2">Eligible statuses (comma-separated)<input className={input} value={f.eligible} onChange={set("eligible")} /></label>
-        <label className="sm:col-span-4">Prizes (one per line)<textarea className={input} rows={3} value={f.prizes} onChange={set("prizes")} /></label>
+        <div className="sm:col-span-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <label htmlFor="prizes-text" className="font-bold">Prizes (one per line)</label>
+            <div role="group" aria-label="Format the selected words" className="flex gap-2">
+              <button type="button" onClick={() => wrapSelection("**")} aria-label="Bold the selected words" className="min-w-[44px] rounded-md border-2 border-teal-700 px-3 py-1 text-teal-800 hover:bg-teal-50"><span className="font-bold">B</span></button>
+              <button type="button" onClick={() => wrapSelection("__")} aria-label="Underline the selected words" className="min-w-[44px] rounded-md border-2 border-teal-700 px-3 py-1 text-teal-800 hover:bg-teal-50"><span className="underline">U</span></button>
+            </div>
+          </div>
+          <textarea id="prizes-text" ref={prizesRef} className={`${input} mt-1`} rows={5} value={f.prizes} onChange={set("prizes")} />
+          <p className="mt-1 text-sm text-teal-800">
+            Write each prize as <strong>English | Français</strong>. To format words, select them and press <strong>B</strong> or <u>U</u> (each language separately), or type **bold** and __underline__ yourself. Both: **__like this__**.
+          </p>
+          <PrizePreview text={f.prizes} />
+        </div>
       </div>
       <p className="mt-4 text-sm text-teal-800">The public page opens on the current month once it begins (never before November 2026). Earlier months stay in its month list.</p>
       <p className="mt-2 text-sm text-teal-800">The two thresholds are shown on the dashboard. Minimum consults and minimum Patient Satisfaction Score are used only if ballots are calculated in the app. While ballots come from the sheet&apos;s Ballots Earned column they have no effect.</p>
