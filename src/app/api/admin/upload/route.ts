@@ -15,12 +15,23 @@ export async function POST(req: Request) {
   if (file.size > MAX_BYTES) return NextResponse.json({ error: "File is larger than 4 MB." }, { status: 413 });
   try {
     const ds = parseProductivityCsv(await file.text());
+    if (!ds.optOut?.found) {
+      return NextResponse.json(
+        { error: 'This file has no "Opted-Out?" column, so opted-out clinicians could not be removed. Download the latest version of the Productivity tab and upload that.' },
+        { status: 400 }
+      );
+    }
     await saveDataset(ds);
-    return NextResponse.json({ ok: true, clinicians: ds.records.length, months: ds.months, syncedAt: ds.syncedAt });
+    return NextResponse.json({
+      ok: true,
+      clinicians: ds.records.length,
+      months: ds.months,
+      syncedAt: ds.syncedAt,
+      optedOut: ds.optOut.excluded,
+      optOutValues: ds.optOut.values
+    });
   } catch (e) {
-    return NextResponse.json(
-      { error: e instanceof ParseError ? e.message : "Could not read that file." },
-      { status: 400 }
-    );
+    if (e instanceof ParseError) return NextResponse.json({ error: e.message }, { status: 400 });
+    return NextResponse.json({ error: e instanceof Error ? e.message : "Could not save the data." }, { status: 500 });
   }
 }

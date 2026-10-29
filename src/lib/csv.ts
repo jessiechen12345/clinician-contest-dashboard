@@ -23,6 +23,10 @@ const NAMES = {
   psat: "psat",
   ballots: "ballots earned"
 } as const;
+/** The "Opted-Out?" column is found by its header. Any value other than an explicit "no" counts as opted out. */
+const OPT_OUT_HEADER = /^opt(ed)?[\s_-]*out/;
+const NOT_OPTED_OUT = new Set(["", "no", "n", "false", "0", "-", "n/a", "na"]);
+
 const norm = (v: unknown) => String(v ?? "").trim().toLowerCase();
 
 function num(v: unknown): number | null {
@@ -50,6 +54,7 @@ export function parseProductivityRows(rows: unknown[][], source: Dataset["source
   const iStatus = col("Status");
   const iId = col("Unique ID");
   if (iEmail < 0 || iId < 0) throw new ParseError('Missing required column "THVC Email" or "Unique ID".');
+  const iOpt = header.findIndex((c) => OPT_OUT_HEADER.test(norm(c)));
 
   // 2. Locate month blocks from the date row, then each column by header text inside its own block.
   const starts: { month: MonthKey; start: number }[] = [];
@@ -81,7 +86,23 @@ export function parseProductivityRows(rows: unknown[][], source: Dataset["source
   if (blocks.length === 0)
     throw new ParseError('No month blocks found. Expected dates like 10/01/2026 above columns headed "SUM ON/QC Consults", "All Up: Consults/hr" and "PSAT".');
 
-  // 3. Build minimal records.
+  // 3a. Who has opted out? Checked before anything else so an opted-out clinician is removed completely,
+  // even if their ID appears on more than one row. Unknown values (anything but an explicit "no") are treated as opted out.
+  const optedOut = new Set<string>();
+  const optValues: Record<string, number> = {};
+  if (iOpt >= 0) {
+    for (let r = headerIdx + 1; r < rows.length; r++) {
+      const row = rows[r];
+      const id = String(row[iId] ?? "").trim();
+      if (!id || id.startsWith("#")) continue;
+      const raw = String(row[iOpt] ?? "").trim();
+      if (NOT_OPTED_OUT.has(raw.toLowerCase())) continue;
+      optedOut.add(id.toLowerCase());
+      optValues[raw] = (optValues[raw] ?? 0) + 1;
+    }
+  }
+
+  // 3b. Build minimal records.
   const records: ClinicianRecord[] = [];
   const seen = new Set<string>();
   for (let r = headerIdx + 1; r < rows.length; r++) {
@@ -90,6 +111,7 @@ export function parseProductivityRows(rows: unknown[][], source: Dataset["source
     const email = String(row[iEmail] ?? "").trim().toLowerCase();
     if (!id || id.startsWith("#") || !email) continue; // blank / #N/A rows
     const key = id.toLowerCase();
+    if (optedOut.has(key)) continue; // opted out: not stored, counted, or searchable
     if (seen.has(key)) continue;
     seen.add(key);
 
@@ -120,7 +142,8 @@ export function parseProductivityRows(rows: unknown[][], source: Dataset["source
     syncedAt: new Date().toISOString(),
     source,
     months: blocks.map((b) => b.month).sort(),
-    records
+    records,
+    optOut: { found: iOpt >= 0, excluded: optedOut.size, values: optValues }
   };
 }
 

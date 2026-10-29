@@ -249,7 +249,10 @@ function DataCard({ meta, reload }: { meta: any; reload: () => void }) {
       const fd = new FormData();
       fd.append("file", file);
       const r = await api("/api/admin/upload", { method: "POST", body: fd });
-      setN({ ok: true, text: `Loaded ${r.clinicians} clinicians (${r.months.join(", ")}) from ${file.name}. The dashboard now shows this data.` });
+      const out = r.optedOut
+        ? ` ${r.optedOut} opted-out clinician${r.optedOut === 1 ? " was" : "s were"} left out completely (marked ${Object.entries(r.optOutValues ?? {}).map(([k, v]) => `"${k}" ×${v}`).join(", ")}).`
+        : " No one is marked as opted out.";
+      setN({ ok: true, text: `Loaded ${r.clinicians} clinicians (${r.months.join(", ")}) from ${file.name}.${out} The dashboard now shows this data.` });
       reload();
     } catch (e: any) {
       setN({ ok: false, text: e.message });
@@ -262,7 +265,7 @@ function DataCard({ meta, reload }: { meta: any; reload: () => void }) {
     <section className={card}>
       <h2 className="text-xl font-bold">Upload data</h2>
       <p className="mt-2">
-        {d ? <>Currently showing {d.clinicians} clinicians for {d.months.join(", ")}. Uploaded {fmtDateTime(d.syncedAt)}</> : "No data has been uploaded yet."}
+        {d ? <>Currently showing {d.clinicians} clinicians for {d.months.join(", ")}. Uploaded {fmtDateTime(d.syncedAt)}{d.optedOut ? `. ${d.optedOut} opted-out clinician${d.optedOut === 1 ? " is" : "s are"} excluded.` : ""}</> : "No data has been uploaded yet."}
       </p>
       <ol className="mt-3 list-decimal space-y-1 pl-6 text-sm text-teal-800">
         <li>In the Google Sheet, open the <strong>Productivity</strong> tab.</li>

@@ -31,6 +31,11 @@ export interface Dataset {
   source: "google-sheet" | "csv-upload";
   months: MonthKey[]; // months detected in the file
   records: ClinicianRecord[];
+  /**
+   * The "Opted-Out?" column. Clinicians marked as opted out are NOT in `records` at all (not stored, not counted,
+   * not searchable). Only how many were left out, and the labels used (e.g. "Yes"), are kept.
+   */
+  optOut?: { found: boolean; excluded: number; values: Record<string, number> };
 }
 
 export interface MonthConfig {

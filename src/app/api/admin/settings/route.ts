@@ -20,7 +20,7 @@ export async function GET(req: Request) {
     settings,
     month,
     config: resolveMonthConfig(settings, month),
-    dataset: ds ? { syncedAt: ds.syncedAt, source: ds.source, months: ds.months, clinicians: ds.records.length } : null
+    dataset: ds ? { syncedAt: ds.syncedAt, source: ds.source, months: ds.months, clinicians: ds.records.length, optedOut: ds.optOut?.excluded ?? null } : null
   });
 }
 
